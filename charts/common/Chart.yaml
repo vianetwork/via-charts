@@ -1,11 +1,12 @@
 apiVersion: v2
 name: common
 description: Function library for Via charts
+icon: https://raw.githubusercontent.com/vianetwork/via-charts/main/.assets/icon.png
 type: library
 maintainers:
   - name: via
     email: via@viablockchain.xyz
-version: 1.0.0
+version: 1.0.1
 kubeVersion: ">=1.16.0-0"
 home: https://github.com/vianetwork/via-charts
 sources:
