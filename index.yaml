@@ -7,6 +7,31 @@ entries:
         - name: Chart Source
           url: https://github.com/vianetwork/via-charts
     apiVersion: v2
+    created: "2025-12-25T13:46:51.096069526Z"
+    description: Function library for Via charts
+    digest: e817c4e5e1d4480681ab70b32a595904ee08ab380978570626e6255ab08a03af
+    home: https://github.com/vianetwork/via-charts
+    icon: https://raw.githubusercontent.com/vianetwork/via-charts/main/.assets/icon.png
+    keywords:
+    - via
+    - common
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: via@viablockchain.xyz
+      name: via
+    name: common
+    sources:
+    - https://github.com/vianetwork/via-charts
+    type: library
+    urls:
+    - https://github.com/vianetwork/via-charts/releases/download/common-1.0.2/common-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/vianetwork/via-charts
+    apiVersion: v2
     created: "2025-12-25T02:24:04.952756153Z"
     description: Function library for Via charts
     digest: 5e319c71f9d5a1cacc309c16349ffd778afb663a3854e707800973ee6ae8eaa1
@@ -50,4 +75,4 @@ entries:
     urls:
     - https://github.com/vianetwork/via-charts/releases/download/common-1.0.0/common-1.0.0.tgz
     version: 1.0.0
-generated: "2025-12-25T03:48:24.363462267Z"
+generated: "2025-12-25T13:46:51.096081639Z"
