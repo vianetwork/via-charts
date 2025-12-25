@@ -1,0 +1,20 @@
+apiVersion: v2
+name: common
+description: Function library for Via charts
+type: library
+maintainers:
+  - name: via
+    email: via@viablockchain.xyz
+version: 1.0.0
+kubeVersion: ">=1.16.0-0"
+home: https://github.com/vianetwork/via-charts
+sources:
+  - https://github.com/vianetwork/via-charts
+keywords:
+  - via
+  - common
+annotations:
+  "artifacthub.io/license": Apache-2.0
+  "artifacthub.io/links": |
+    - name: Chart Source
+      url: https://github.com/vianetwork/via-charts
