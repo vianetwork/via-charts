@@ -6,8 +6,8 @@ type: application
 maintainers:
   - name: via
     email: via@viablockchain.xyz
-version: 1.0.0
-appVersion: v28.0.2
+version: 1.0.1
+appVersion: v28.0.3
 kubeVersion: ">=1.16.0-0"
 home: https://github.com/vianetwork/via-charts
 sources:
@@ -26,4 +26,4 @@ annotations:
 dependencies:
   - name: common
     repository: https://vianetwork.github.io/via-charts
-    version: 1.0.1
+    version: 1.0.2
