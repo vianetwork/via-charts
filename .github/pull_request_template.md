@@ -35,7 +35,6 @@ We would like these checks to pass before we even continue reviewing your change
 <!-- Why are these changes done? What goal do they contribute to? What are the principles behind them? -->
 <!-- Example: PR templates ensure PR reviewers, observers, and future iterators are in context about the evolution of repos. -->
 
-
 ## Checklist
 
 <!-- [Place an '[x]' (no spaces) in all applicable fields. Please remove unrelated fields.] -->
