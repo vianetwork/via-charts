@@ -75,4 +75,39 @@ entries:
     urls:
     - https://github.com/vianetwork/via-charts/releases/download/common-1.0.0/common-1.0.0.tgz
     version: 1.0.0
-generated: "2025-12-25T13:46:51.096081639Z"
+  via-external-node:
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/vianetwork/via-charts
+        - name: Upstream Project
+          url: https://github.com/vianetwork/via-core
+    apiVersion: v2
+    appVersion: v28.0.2
+    created: "2025-12-25T15:46:57.183690105Z"
+    dependencies:
+    - name: common
+      repository: https://vianetwork.github.io/via-charts
+      version: 1.0.1
+    description: The VIA Network node is a read-replica of the main node that can
+      be run by external parties.
+    digest: 2bfb11f3f2fbfeef2a1e984df9d655e590191fe8085b4a290f2325915ebc5b53
+    home: https://github.com/vianetwork/via-charts
+    icon: https://raw.githubusercontent.com/vianetwork/via-charts/main/.assets/icon.png
+    keywords:
+    - via
+    - via-external-node
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: via@viablockchain.xyz
+      name: via
+    name: via-external-node
+    sources:
+    - https://github.com/vianetwork/via-charts
+    - https://github.com/vianetwork/via-core
+    type: application
+    urls:
+    - https://github.com/vianetwork/via-charts/releases/download/via-external-node-1.0.0/via-external-node-1.0.0.tgz
+    version: 1.0.0
+generated: "2025-12-25T15:46:57.183706506Z"
