@@ -51,6 +51,10 @@ jobs:
           helm repo add vianetwork https://vianetwork.github.io/via-charts
           helm repo update
 
+      - name: Build Chart Dependencies
+        run: |
+          find charts -name Chart.yaml -execdir helm dependency build \;
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
