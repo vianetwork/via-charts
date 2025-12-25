@@ -1,0 +1,21 @@
+{{/* Make sure all variables are set properly */}}
+{{- include "common.values.setup" . }}
+
+{{/* Append the configMap volume to the volumes */}}
+{{- define "external-node.consensus.yaml" -}}
+enabled: "true"
+mountPath: "/etc/consensus_config.yaml"
+subPath: "consensus_config.yaml"
+type: "custom"
+volumeSpec:
+  configMap:
+    name: {{ include "common.names.fullname" . }}-consensus
+{{- end -}}
+{{- if .Values.configmap.consensus.enabled -}}
+{{- if not (hasKey .Values.configmap.consensus.data "consensus_config.yaml") }}
+{{ fail "consensus_config.yaml key must be present in config data" }}
+{{- end -}}
+{{- $_ := set .Values.persistence "external-node-consensus" (include "external-node.consensus.yaml" . | fromYaml) -}}
+{{- end -}}
+
+{{ include "common.all" . }}

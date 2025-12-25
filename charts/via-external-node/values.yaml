@@ -1,0 +1,166 @@
+controller:
+  enabled: true
+  type: statefulset
+  replicas: 1
+
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+
+podLabels:
+  app/logs_json: "true"
+
+envFrom:
+  # Reference a ConfigMap included in this chart (see the configmap.config section).
+  # By default, a '-config' suffix is added to the release name: <release-name>-config.
+  # This suffix can be changed by setting config.map.config.nameOverride.
+  # Alternatively, use global.fullNameOverride to set a static name that does not
+  # depend on the release name. In that case, the name will be <fullNameOverride>-config.
+  - configMapRef:
+      name: via-external-node-config
+  # The secret should contain the following:
+  #  DATABASE_URL: ""
+  #  VIA_BTC_CLIENT_RPC_USER: ""
+  #  VIA_BTC_CLIENT_RPC_PASSWORD: ""
+# - secretRef:  # Specify the name of the secret
+#      name: via-external-node
+
+
+image:
+  repository: vianetwork/via-external-node
+  tag: v28.0.2
+  pullPolicy: IfNotPresent
+
+env:
+  - name: VIA_HOME
+    value: "/"
+  - name: POD_NAME
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: metadata.name
+  - name: POD_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
+  - name: SERVICE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['app.kubernetes.io/instance']
+  - name: SERVER_REPLICA_NAME
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: metadata.name
+
+resources:
+  requests:
+    cpu: 1
+    memory: 2.5Gi
+
+autoscaling:
+  enabled: false
+
+probes:
+  liveness:
+    enabled: false
+  startup:
+    enabled: false
+  readiness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        path: /health
+        port: health
+
+service:
+  main:
+    enabled: true
+    ports:
+      http:
+        enabled: true
+        port: 3060
+      ws:
+        enabled: true
+        port: 3061
+      metrics:
+        enabled: true
+        port: 3322
+      health:
+        enabled: true
+        port: 3081
+
+serviceMonitor:
+  enabled: true
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: "app.kubernetes.io/instance"
+                operator: In
+                values:
+                  - via-external-node
+          topologyKey: "kubernetes.io/hostname"
+
+
+volumeClaimTemplates:
+  - name: via-external-node
+    storageClass: premium-rwo
+    mountPath: /db
+    accessMode: "ReadWriteOnce"
+    size: 20Gi
+
+
+configmap:
+  config:
+    enabled: true
+    nameOverride: "config"
+    data: # testnet configuration
+      DATABASE_POOL_SIZE: "50"
+      ZKSYNC_ACTION: "dont_ask"
+      EN_MAIN_NODE_URL: "https://testnet.via.onvia.org"
+      EN_PRUNING_DATA_RETENTION_HOURS: "forever"
+      EN_SNAPSHOTS_RECOVERY_ENABLED: "false"
+      EN_HTTP_PORT: "3060"
+      EN_WS_PORT: "3061"
+      EN_PROMETHEUS_PORT: "3322"
+      EN_HEALTHCHECK_PORT: "3081"
+      EN_THREADS_PER_SERVER: "128"
+      EN_L2_CHAIN_ID: "25223"
+      EN_L1_CHAIN_ID: "11155111"
+      EN_REQ_ENTITIES_LIMIT: "10000"
+      EN_STATE_CACHE_PATH: "./db/via_ext_node/state_keeper"
+      EN_MERKLE_TREE_PATH: "./db/via_ext_node/lightweight"
+      EN_MAX_L1_BATCHES_PER_TREE_ITER: "20"
+      EN_ETH_CLIENT_URL: "https://ethereum-sepolia-rpc.publicnode.com" # not used
+      EN_API_NAMESPACES: "via,eth,web3,net,pubsub,zks,en,debug"
+      EN_BOOTLOADER_HASH: "0x0100038581be3d0e201b3cc45d151ef5cc59eb3a0f146ad44f0f72abf00b594c"
+      EN_DEFAULT_AA_HASH: "0x0100038dc66b69be75ec31653c64cb931678299b9b659472772b2550b703f41c"
+      EN_OPERATOR_ADDR: "0xde03a0B5963f75f1C8485B355fF6D30f3093BDE7"
+      EN_DATABASE_LONG_CONNECTION_THRESHOLD_MS: "2000"
+      EN_DATABASE_SLOW_QUERY_THRESHOLD_MS: "100"
+      EN_SNAPSHOTS_OBJECT_STORE_BUCKET_BASE_URL: "via-external-node-snapshots-testnet"
+      EN_SNAPSHOTS_OBJECT_STORE_MODE: "GCS"
+      EN_GATEWAY_URL: "https://testnet.via.onvia.org"
+      RUST_LOG: "warn,zksync_node_framework=info,zksync_node_consensus=info,zksync_consensus_bft=info,zksync_consensus_network=info,zksync_consensus_storage=info,zksync_commitment_generator=info,zksync_core=debug,zksync_dal=info,zksync_db_connection=info,zksync_health_check=debug,zksync_eth_client=info,zksync_state_keeper=info,zksync_node_sync=info,zksync_storage=info,zksync_metadata_calculator=info,zksync_merkle_tree=info,zksync_node_api_server=info,zksync_node_db_pruner=info,zksync_reorg_detector=info,via_consistency_checker=info,zksync_state=debug,zksync_utils=debug,zksync_types=info,zksync_web3_decl=debug,loadnext=info,vm=info,zksync_external_node=info,zksync_snapshots_applier=debug,"
+      RUST_BACKTRACE: "full"
+      RUST_LIB_BACKTRACE: "1"
+      MISC_LOG_FORMAT: "json"
+      VIA_BTC_CLIENT_NETWORK: "testnet4"
+      VIA_BTC_CLIENT_RPC_URL: "http://bitcoin-internal.bitcoin.svc.cluster.local:48332" # override with the URL of testnet4 bitcoin node
+      VIA_BTC_CLIENT_EXTERNAL_APIS: "https://mempool.space/testnet4/api/v1/fees/recommended"
+      VIA_BTC_CLIENT_FEE_STRATEGIES: "fastestFee"
+      VIA_BTC_CLIENT_USE_RPC_FOR_FEE_RATE: "true"
+      VIA_BTC_WATCH_POLL_INTERVAL: "5000"
+      VIA_BTC_WATCH_BLOCK_CONFIRMATIONS: "3"
+      VIA_BTC_WATCH_BTC_BLOCKS_LAG: "1000"
+      VIA_BTC_WATCH_START_L1_BLOCK_NUMBER: "100891"
+      VIA_BTC_WATCH_RESTART_INDEXING: "false"
+      VIA_BRIDGE_BRIDGE_ADDRESS: "tb1ppsy8j80jtns42rkpdsfcv25qfschqejxmk6datkvu236eekr4fms06wnz0"
+      VIA_BRIDGE_VERIFIERS_PUB_KEYS: "0302ede5e1f0a6ceedf0c4263bb47b803973a3ffa4968b147c1d0f38c62f8c45df,023e01e4e2ff564b0fd159d94e1549fddf605f077a8c143e7a4f555adbeb324fe1"
+      VIA_GENESIS_BOOTSTRAP_TXIDS: "c89e5db75e74700582d106f1c0aa85f7b0df1436cecd3a6536f11bed9db0f407"
+      VIA_REORG_DETECTOR_POLL_INTERVAL_MS: "5000"
