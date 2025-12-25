@@ -1,0 +1,215 @@
+manifest should match snapshot:
+  1: |
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      annotations:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: via-external-node
+        helm.sh/chart: via-external-node-3.4.4
+      name: RELEASE-NAME-via-external-node
+    spec:
+      podManagementPolicy: OrderedReady
+      revisionHistoryLimit: 3
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: via-external-node
+      serviceName: RELEASE-NAME-via-external-node
+      template:
+        metadata:
+          annotations:
+            cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: via-external-node
+            app/logs_json: "true"
+        spec:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app.kubernetes.io/instance
+                          operator: In
+                          values:
+                            - via-external-node
+                    topologyKey: kubernetes.io/hostname
+                  weight: 100
+          automountServiceAccountToken: true
+          containers:
+            - command:
+                - /usr/bin/via_external_node
+              env:
+                - name: VIA_HOME
+                  value: /
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: SERVICE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['app.kubernetes.io/instance']
+                - name: SERVER_REPLICA_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+              envFrom:
+                - configMapRef:
+                    name: via-external-node-config
+                - secretRef:
+                    name: via-external-node-secret
+              image: matterlabs/server:latest2.0
+              imagePullPolicy: Always
+              name: RELEASE-NAME-via-external-node
+              ports:
+                - containerPort: 3071
+                  name: health
+                  protocol: TCP
+                - containerPort: 3050
+                  name: http
+                  protocol: TCP
+                - containerPort: 3312
+                  name: metrics
+                  protocol: TCP
+                - containerPort: 3051
+                  name: ws-api
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /health
+                  port: health
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+              resources:
+                requests:
+                  cpu: 1000m
+                  memory: 256Mi
+              volumeMounts:
+                - mountPath: /db
+                  name: via-external-node
+          dnsPolicy: ClusterFirst
+          enableServiceLinks: true
+          nodeSelector:
+            node_pool: s2-pool
+          serviceAccountName: default
+          tolerations:
+            - effect: NoSchedule
+              key: server-v2
+              operator: Equal
+              value: "true"
+      updateStrategy:
+        type: RollingUpdate
+      volumeClaimTemplates:
+        - metadata:
+            name: via-external-node
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 50Gi
+            storageClassName: premium-rwo
+  2: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations: null
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: via-external-node
+        helm.sh/chart: via-external-node-1.0.0
+      name: RELEASE-NAME-via-external-node
+    spec:
+      ports:
+        - name: health
+          port: 3071
+          protocol: TCP
+          targetPort: health
+        - name: http
+          port: 3050
+          protocol: TCP
+          targetPort: http
+        - name: metrics
+          port: 3312
+          protocol: TCP
+          targetPort: metrics
+        - name: ws-api
+          port: 3051
+          protocol: TCP
+          targetPort: ws-api
+      selector:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/name: via-external-node
+      type: ClusterIP
+  3: |
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      annotations:
+        cert-manager.io/duration: 8760h
+        cert-manager.io/issuer: default-origin-ca-issuer
+        cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
+        cert-manager.io/issuer-kind: OriginIssuer
+        cert-manager.io/renew-before: 2160h
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/client-body-buffer-size: 24k
+        nginx.ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: 8m
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: via-external-node
+        helm.sh/chart: via-external-node-3.4.4
+      name: RELEASE-NAME-via-external-node
+    spec:
+      rules:
+        - host: chart-example.local
+          http:
+            paths:
+              - backend:
+                  service:
+                    name: RELEASE-NAME-via-external-node
+                    port:
+                      number: 3050
+                path: /
+                pathType: Prefix
+  4: |
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      annotations:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: via-external-node
+        helm.sh/chart: via-external-node-1.0.0
+      name: RELEASE-NAME-via-external-node
+    spec:
+      endpoints:
+        - interval: 30s
+          path: /metrics
+          port: metrics
+          scrapeTimeout: 30s
+      namespaceSelector:
+        matchNames:
+          - NAMESPACE
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: via-external-node

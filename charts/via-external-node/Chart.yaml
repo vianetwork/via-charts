@@ -1,0 +1,29 @@
+apiVersion: v2
+name: via-external-node
+description: The VIA Network node is a read-replica of the main node that can be run by external parties.
+icon: https://raw.githubusercontent.com/vianetwork/via-charts/main/.assets/icon.png
+type: application
+maintainers:
+  - name: via
+    email: via@viablockchain.xyz
+version: 1.0.0
+appVersion: v28.0.2
+kubeVersion: ">=1.16.0-0"
+home: https://github.com/vianetwork/via-charts
+sources:
+  - https://github.com/vianetwork/via-charts
+  - https://github.com/vianetwork/via-core
+keywords:
+  - via
+  - via-external-node
+annotations:
+  "artifacthub.io/license": Apache-2.0
+  "artifacthub.io/links": |
+    - name: Chart Source
+      url: https://github.com/vianetwork/via-charts
+    - name: Upstream Project
+      url: https://github.com/vianetwork/via-core
+dependencies:
+  - name: common
+    repository: https://vianetork.github.io/via-charts
+    version: 1.0.1

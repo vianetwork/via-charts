@@ -1,0 +1,6 @@
+templates:
+  - external-node.yaml
+tests:
+  - it: manifest should match snapshot
+    asserts:
+      - matchSnapshot: {}
