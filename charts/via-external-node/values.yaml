@@ -27,7 +27,7 @@ envFrom:
 
 image:
   repository: vianetwork/via-external-node
-  tag: v28.0.2
+  tag: v28.0.3
   pullPolicy: IfNotPresent
 
 env:
