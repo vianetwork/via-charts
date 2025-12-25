@@ -20,14 +20,19 @@ jobs:
       - name: Fetch history
         run: git fetch --prune --unshallow
 
+      - name: Configure Git
+        run: |
+          git config user.name "via-network-bot"
+          git config user.email "via-network-bot@users.noreply.github.com"
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: v3.12.0
 
-      - name: Add dependency chart repos
-        run: |
-          helm repo add vianetwork https://vianetwork.github.io/via-charts
+#      - name: Add dependency chart repos
+#        run: |
+#          helm repo add vianetwork https://vianetwork.github.io/via-charts
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
