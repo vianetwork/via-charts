@@ -25,5 +25,5 @@ annotations:
       url: https://github.com/vianetwork/via-core
 dependencies:
   - name: common
-    repository: https://vianetork.github.io/via-charts
+    repository: https://vianetwork.github.io/via-charts
     version: 1.0.1
